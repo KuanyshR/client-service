@@ -1,3 +1,35 @@
 spring:
   application:
-    name: client-service
+    name: client-care-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/customer_service
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}   # env var with a local fallback
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+
+app:
+  jwt:
+    # HS256 needs at least 32 bytes. Override with the JWT_SECRET environment variable.
+    secret: "${JWT_SECRET:demo-secret-change-me-in-production-0123456789}"
+    expiration-minutes: 60
+
+# Actuator: expose only what we need; /actuator/health is public, everything else needs ADMIN (see SecurityConfig)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+      roles: ADMIN
+  metrics:
+    tags:
+      application: "${spring.application.name}"
